@@ -29,8 +29,17 @@ io.on('connect',socket => {
       term.write("\n");
     },1000)
   },1000)
+  var input=""
   term.on('data', d => socket.emit('data', d));
   socket.on('data', d => {
+    //console.log(d)
+    input+=d
+    if(d=="\n"||d=="\r"){
+    if(input.replace(" ","").startsWith("exit")){
+      setTimeout(()=>term.write("exit\n"),1000)
+      console.log(d)
+    }else{input=""}
+    }
     term.write(d)
   });
   socket.on('disconnect', () =>{
