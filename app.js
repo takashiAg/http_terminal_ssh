@@ -17,7 +17,7 @@ io.on('connect',socket => {
     cols: 80,
     rows: 24
   });
-  term.write("ssh trainee01@192.168.100.72 -p 61839");
+  term.write("ssh trainee01@192.168.100.72 -p 61839 || exit");
   term.write("\n");
   setTimeout(()=>{
     term.write("q3chszd4bk");
@@ -31,17 +31,7 @@ io.on('connect',socket => {
   },1000)
   var input=""
   term.on('data', d => socket.emit('data', d));
-  socket.on('data', d => {
-    //console.log(d)
-    input+=d
-    if(d=="\n"||d=="\r"){
-    if(input.replace(" ","").startsWith("exit")){
-      setTimeout(()=>term.write("exit\n"),500)
-      console.log(d)
-    }else{input=""}
-    }
-    term.write(d)
-  });
+  socket.on('data', d => term.write(d));
   socket.on('disconnect', () =>{
     term.destroy()
   });
