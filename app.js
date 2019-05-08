@@ -17,10 +17,10 @@ io.on('connect',socket => {
     cols: 80,
     rows: 24
   });
-  term.write("ssh trainee01@192.168.100.72 -p 64109");
+  term.write("ssh trainee01@192.168.100.72 -p 61839");
   term.write("\n");
   setTimeout(()=>{
-    term.write("vygs1inzu0");
+    term.write("q3chszd4bk");
     term.write("\n");
     setTimeout(()=>{
       term.write("history -c");
@@ -36,7 +36,7 @@ io.on('connect',socket => {
     input+=d
     if(d=="\n"||d=="\r"){
     if(input.replace(" ","").startsWith("exit")){
-      setTimeout(()=>term.write("exit\n"),1000)
+      setTimeout(()=>term.write("exit\n"),500)
       console.log(d)
     }else{input=""}
     }
