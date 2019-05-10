@@ -5,36 +5,42 @@ const express = require('express')
     , server = require('http').createServer(app)
     , pugStatic = require('pug-static')
     , Io = require('socket.io')
-    , pty = require('pty.js')
+    , Client = require('ssh2').Client;
+
+let ssh_config = {
+    host: '10.211.55.37',
+    port: 22,
+    username: 'user',
+    password: 'password'
+}
 
 app.use('/xterm.js', express.static('node_modules/xterm'))
 app.use('/', pugStatic('views'))
 
 let io = new Io(server);
-io.on('connect',socket => {
-  let term = pty.spawn('bash', [], {
-    name: 'xterm-256color',
-    cols: 80,
-    rows: 24
-  });
-  term.write("ssh trainee01@192.168.100.72 -p 61839 || exit");
-  term.write("\n");
-  setTimeout(()=>{
-    term.write("q3chszd4bk");
-    term.write("\n");
-    setTimeout(()=>{
-      term.write("history -c");
-      term.write("\n");
-      term.write("clear");
-      term.write("\n");
-    },1000)
-  },1000)
-  var input=""
-  term.on('data', d => socket.emit('data', d));
-  socket.on('data', d => term.write(d));
-  socket.on('disconnect', () =>{
-    term.destroy()
-  });
+io.on('connect', socket => {
+    let ssh_stream;
+    let conn = new Client();
+    conn.on('ready', function () {
+        conn.shell((err, stream) => {
+            if (err)
+                throw err;
+            ssh_stream = stream;
+            stream
+                .on('close', conn.end)
+                .on('data', data => socket.emit('data', "" + data));
+        });
+    })
+        .connect(ssh_config);
+    socket.on('data', d => {
+        ssh_stream.write(d)
+        console.log(d);
+    });
+    socket.on('disconnect', () => {
+        ssh_stream.end('\nexit\n');
+    });
 });
 
 server.listen(3000);
+
+
