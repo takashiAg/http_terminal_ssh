@@ -20,8 +20,8 @@ app.use('/', pugStatic('views'))
 let io = new Io(server);
 io.on('connect', socket => {
     let ssh_stream;
-    let conn = new Client();
-    let shell = (err, stream) => {
+
+    let open_shell = (err, stream) => {
         if (err)
             throw err;
         ssh_stream = stream;
@@ -29,8 +29,10 @@ io.on('connect', socket => {
             .on('close', conn.end)
             .on('data', data => socket.emit('data', "" + data));
     }
+
+    let conn = new Client();
     conn
-        .on('ready', () => conn.shell(shell))
+        .on('ready', () => conn.shell(open_shell))
         .connect(ssh_config);
     socket.on('data', d => ssh_stream.write(d));
     socket.on('disconnect', () => ssh_stream.end('\nexit\n'))
