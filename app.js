@@ -21,24 +21,19 @@ let io = new Io(server);
 io.on('connect', socket => {
     let ssh_stream;
     let conn = new Client();
-    conn.on('ready', function () {
-        conn.shell((err, stream) => {
-            if (err)
-                throw err;
-            ssh_stream = stream;
-            stream
-                .on('close', conn.end)
-                .on('data', data => socket.emit('data', "" + data));
-        });
-    })
+    let shell = (err, stream) => {
+        if (err)
+            throw err;
+        ssh_stream = stream;
+        stream
+            .on('close', conn.end)
+            .on('data', data => socket.emit('data', "" + data));
+    }
+    conn
+        .on('ready', () => conn.shell(shell))
         .connect(ssh_config);
-    socket.on('data', d => {
-        ssh_stream.write(d)
-        console.log(d);
-    });
-    socket.on('disconnect', () => {
-        ssh_stream.end('\nexit\n');
-    });
+    socket.on('data', d => ssh_stream.write(d));
+    socket.on('disconnect', () => ssh_stream.end('\nexit\n'))
 });
 
 server.listen(3000);
